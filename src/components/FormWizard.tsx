@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import EnhancedBolu from './EnhancedBolu';
+import FileUpload from './FileUpload';
 
 // Multi-step form wizard component
 const FormWizard = ({ onComplete, initialData }) => {
@@ -20,11 +22,21 @@ const FormWizard = ({ onComplete, initialData }) => {
     phone: '',
     whatsapp: '',
     profilePhoto: null,
-    introMedia: null,
+    introVideo: null,
+    cvFile: null,
+    portfolioLinks: {
+      website: '',
+      linkedin: '',
+      github: '',
+      behance: '',
+      instagram: ''
+    },
+    hourlyRate: '',
+    availability: '',
     ...initialData // Load existing data if editing
   });
 
-  const totalSteps = 6;
+  const totalSteps = 8; // Increased from 6 to 8
   const progress = (currentStep / totalSteps) * 100;
 
   // Available skills for selection
@@ -38,10 +50,21 @@ const FormWizard = ({ onComplete, initialData }) => {
 
   // Handle input changes
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   // Handle skill selection
@@ -54,7 +77,7 @@ const FormWizard = ({ onComplete, initialData }) => {
     }));
   };
 
-  // Handle file uploads (placeholder for now)
+  // Handle file uploads
   const handleFileUpload = (field, file) => {
     setFormData(prev => ({
       ...prev,
@@ -71,6 +94,8 @@ const FormWizard = ({ onComplete, initialData }) => {
       case 4: return formData.skills.length > 0;
       case 5: return formData.location.trim() !== '';
       case 6: return formData.email.trim() !== '';
+      case 7: return true; // File uploads are optional
+      case 8: return true; // Portfolio links are optional
       default: return true;
     }
   };
@@ -96,14 +121,40 @@ const FormWizard = ({ onComplete, initialData }) => {
     }
   };
 
+  // Get Bolu's mood and message based on current step
+  const getBoluProps = () => {
+    switch (currentStep) {
+      case 1:
+        return { mood: 'happy', message: "Nice to meet you! What should I call you?" };
+      case 2:
+        return { mood: 'encouraging', message: "Tell me your story! Don't be shy 😊" };
+      case 3:
+        return { mood: 'thinking', message: "What amazing services do you offer?" };
+      case 4:
+        return { mood: 'excited', message: "Show off those skills! ⚡" };
+      case 5:
+        return { mood: 'happy', message: "Where in the world are you? 🌍" };
+      case 6:
+        return { mood: 'encouraging', message: "How can clients reach you? 📱" };
+      case 7:
+        return { mood: 'excited', message: "Let's make your portfolio shine! ✨" };
+      case 8:
+        return { mood: 'celebrating', message: "Almost done! Share your online presence 🌐" };
+      default:
+        return { mood: 'happy', message: "You're doing great!" };
+    }
+  };
+
   // Render different form steps
   const renderStep = () => {
+    const boluProps = getBoluProps();
+
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">👋</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">What's your name?</h2>
               <p className="text-gray-600">Let's start with the basics!</p>
             </div>
@@ -120,7 +171,7 @@ const FormWizard = ({ onComplete, initialData }) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">📝</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">Tell us about yourself</h2>
               <p className="text-gray-600">Share your story and experience</p>
             </div>
@@ -137,7 +188,7 @@ const FormWizard = ({ onComplete, initialData }) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🛠️</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">What services do you offer?</h2>
               <p className="text-gray-600">Describe what you can help clients with</p>
             </div>
@@ -154,7 +205,7 @@ const FormWizard = ({ onComplete, initialData }) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🎯</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">What are your skills?</h2>
               <p className="text-gray-600">Select all that apply (choose at least one)</p>
             </div>
@@ -186,7 +237,7 @@ const FormWizard = ({ onComplete, initialData }) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">🌍</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">Where are you located?</h2>
               <p className="text-gray-600">Help clients know your timezone and location</p>
             </div>
@@ -203,7 +254,7 @@ const FormWizard = ({ onComplete, initialData }) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="text-6xl mb-4">📱</div>
+              <EnhancedBolu {...boluProps} />
               <h2 className="text-2xl font-bold text-gray-800">How can clients reach you?</h2>
               <p className="text-gray-600">Add your contact information</p>
             </div>
@@ -227,21 +278,100 @@ const FormWizard = ({ onComplete, initialData }) => {
                 onChange={(e) => handleInputChange('whatsapp', e.target.value)}
                 className="text-lg p-4"
               />
-            </div>
-            <div className="mt-6 space-y-4">
-              <h3 className="font-semibold text-gray-800">Optional uploads:</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <div className="text-2xl mb-2">📸</div>
-                  <p className="text-sm text-gray-600">Profile Photo</p>
-                  <p className="text-xs text-gray-500">Coming soon!</p>
-                </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <div className="text-2xl mb-2">🎥</div>
-                  <p className="text-sm text-gray-600">Intro Video/Audio</p>
-                  <p className="text-xs text-gray-500">Coming soon!</p>
-                </div>
+                <Input
+                  placeholder="Hourly rate (e.g., $25/hour)"
+                  value={formData.hourlyRate}
+                  onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
+                  className="text-lg p-4"
+                />
+                <Input
+                  placeholder="Availability (e.g., Full-time, Part-time)"
+                  value={formData.availability}
+                  onChange={(e) => handleInputChange('availability', e.target.value)}
+                  className="text-lg p-4"
+                />
               </div>
+            </div>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Upload your files</h2>
+              <p className="text-gray-600">Make your portfolio stand out! (All optional)</p>
+            </div>
+            <div className="space-y-6">
+              <FileUpload
+                type="image"
+                label="Profile Photo"
+                description="Upload a professional photo of yourself"
+                maxSize={5}
+                onFileSelect={(file) => handleFileUpload('profilePhoto', file)}
+                currentFile={formData.profilePhoto}
+              />
+              <FileUpload
+                type="video"
+                label="Intro Video"
+                description="Record a short video introducing yourself (max 2 minutes)"
+                maxSize={50}
+                onFileSelect={(file) => handleFileUpload('introVideo', file)}
+                currentFile={formData.introVideo}
+              />
+              <FileUpload
+                type="document"
+                label="CV/Resume"
+                description="Upload your resume or CV"
+                maxSize={10}
+                onFileSelect={(file) => handleFileUpload('cvFile', file)}
+                currentFile={formData.cvFile}
+              />
+            </div>
+          </div>
+        );
+
+      case 8:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Share your online presence</h2>
+              <p className="text-gray-600">Add links to your portfolio and social profiles</p>
+            </div>
+            <div className="space-y-4">
+              <Input
+                placeholder="Personal website or portfolio URL"
+                value={formData.portfolioLinks.website}
+                onChange={(e) => handleInputChange('portfolioLinks.website', e.target.value)}
+                className="text-lg p-4"
+              />
+              <Input
+                placeholder="LinkedIn profile URL"
+                value={formData.portfolioLinks.linkedin}
+                onChange={(e) => handleInputChange('portfolioLinks.linkedin', e.target.value)}
+                className="text-lg p-4"
+              />
+              <Input
+                placeholder="GitHub profile URL"
+                value={formData.portfolioLinks.github}
+                onChange={(e) => handleInputChange('portfolioLinks.github', e.target.value)}
+                className="text-lg p-4"
+              />
+              <Input
+                placeholder="Behance/Dribbble profile URL"
+                value={formData.portfolioLinks.behance}
+                onChange={(e) => handleInputChange('portfolioLinks.behance', e.target.value)}
+                className="text-lg p-4"
+              />
+              <Input
+                placeholder="Instagram profile URL"
+                value={formData.portfolioLinks.instagram}
+                onChange={(e) => handleInputChange('portfolioLinks.instagram', e.target.value)}
+                className="text-lg p-4"
+              />
             </div>
           </div>
         );
