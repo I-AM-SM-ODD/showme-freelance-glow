@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -33,10 +32,17 @@ const FormWizard = ({ onComplete, initialData }) => {
     },
     hourlyRate: '',
     availability: '',
+    bookingPreferences: {
+      availableDays: [],
+      timeSlots: [],
+      meetingTypes: [],
+      timezone: '',
+      callDurations: []
+    },
     ...initialData // Load existing data if editing
   });
 
-  const totalSteps = 8; // Increased from 6 to 8
+  const totalSteps = 9; // Increased from 8 to 9 for booking preferences
   const progress = (currentStep / totalSteps) * 100;
 
   // Available skills for selection
@@ -47,6 +53,15 @@ const FormWizard = ({ onComplete, initialData }) => {
     'Virtual Assistant', 'Customer Service', 'Consulting', 'Tutoring',
     'Music Production', 'Voice Over', 'Animation', 'Copywriting'
   ];
+
+  // Available days for booking
+  const availableDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  
+  // Available time slots
+  const timeSlots = ['Morning (9AM-12PM)', 'Afternoon (12PM-5PM)', 'Evening (5PM-8PM)'];
+  
+  // Meeting types
+  const meetingTypes = ['Quick Chat (15min)', 'Consultation (30min)', 'Project Discussion (45min)', 'Deep Dive (1hr)'];
 
   // Handle input changes
   const handleInputChange = (field, value) => {
@@ -77,6 +92,19 @@ const FormWizard = ({ onComplete, initialData }) => {
     }));
   };
 
+  // Handle booking preference toggles
+  const toggleBookingPreference = (category, item) => {
+    setFormData(prev => ({
+      ...prev,
+      bookingPreferences: {
+        ...prev.bookingPreferences,
+        [category]: prev.bookingPreferences[category].includes(item)
+          ? prev.bookingPreferences[category].filter(i => i !== item)
+          : [...prev.bookingPreferences[category], item]
+      }
+    }));
+  };
+
   // Handle file uploads
   const handleFileUpload = (field, file) => {
     setFormData(prev => ({
@@ -96,6 +124,7 @@ const FormWizard = ({ onComplete, initialData }) => {
       case 6: return formData.email.trim() !== '';
       case 7: return true; // File uploads are optional
       case 8: return true; // Portfolio links are optional
+      case 9: return true; // Booking preferences are optional
       default: return true;
     }
   };
@@ -125,23 +154,25 @@ const FormWizard = ({ onComplete, initialData }) => {
   const getBoluProps = () => {
     switch (currentStep) {
       case 1:
-        return { mood: 'happy', message: "Nice to meet you! What should I call you?" };
+        return { mood: 'happy' as const, message: "Nice to meet you! What should I call you?" };
       case 2:
-        return { mood: 'encouraging', message: "Tell me your story! Don't be shy 😊" };
+        return { mood: 'encouraging' as const, message: "Tell me your story! Don't be shy 😊" };
       case 3:
-        return { mood: 'thinking', message: "What amazing services do you offer?" };
+        return { mood: 'thinking' as const, message: "What amazing services do you offer?" };
       case 4:
-        return { mood: 'excited', message: "Show off those skills! ⚡" };
+        return { mood: 'excited' as const, message: "Show off those skills! ⚡" };
       case 5:
-        return { mood: 'happy', message: "Where in the world are you? 🌍" };
+        return { mood: 'happy' as const, message: "Where in the world are you? 🌍" };
       case 6:
-        return { mood: 'encouraging', message: "How can clients reach you? 📱" };
+        return { mood: 'encouraging' as const, message: "How can clients reach you? 📱" };
       case 7:
-        return { mood: 'excited', message: "Let's make your portfolio shine! ✨" };
+        return { mood: 'excited' as const, message: "Let's make your portfolio shine! ✨" };
       case 8:
-        return { mood: 'celebrating', message: "Almost done! Share your online presence 🌐" };
+        return { mood: 'celebrating' as const, message: "Almost done! Share your online presence 🌐" };
+      case 9:
+        return { mood: 'excited' as const, message: "Let's set up call booking for your clients! 📅" };
       default:
-        return { mood: 'happy', message: "You're doing great!" };
+        return { mood: 'happy' as const, message: "You're doing great!" };
     }
   };
 
@@ -372,6 +403,93 @@ const FormWizard = ({ onComplete, initialData }) => {
                 onChange={(e) => handleInputChange('portfolioLinks.instagram', e.target.value)}
                 className="text-lg p-4"
               />
+            </div>
+          </div>
+        );
+
+      case 9:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Call Booking Preferences</h2>
+              <p className="text-gray-600">Make it easy for clients to book calls with you!</p>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Available Days */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">📅 When are you usually available?</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {availableDays.map((day) => (
+                    <Badge
+                      key={day}
+                      variant={formData.bookingPreferences.availableDays.includes(day) ? "default" : "outline"}
+                      className={`cursor-pointer p-3 text-center transition-all ${
+                        formData.bookingPreferences.availableDays.includes(day)
+                          ? 'bg-gradient-to-r from-orange-500 to-purple-600 text-white'
+                          : 'hover:bg-gray-100'
+                      }`}
+                      onClick={() => toggleBookingPreference('availableDays', day)}
+                    >
+                      {day}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Time Slots */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">⏰ Preferred time slots</h3>
+                <div className="grid md:grid-cols-3 gap-3">
+                  {timeSlots.map((slot) => (
+                    <Badge
+                      key={slot}
+                      variant={formData.bookingPreferences.timeSlots.includes(slot) ? "default" : "outline"}
+                      className={`cursor-pointer p-3 text-center transition-all ${
+                        formData.bookingPreferences.timeSlots.includes(slot)
+                          ? 'bg-gradient-to-r from-orange-500 to-purple-600 text-white'
+                          : 'hover:bg-gray-100'
+                      }`}
+                      onClick={() => toggleBookingPreference('timeSlots', slot)}
+                    >
+                      {slot}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Meeting Types */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">💬 What types of calls do you offer?</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {meetingTypes.map((type) => (
+                    <Badge
+                      key={type}
+                      variant={formData.bookingPreferences.meetingTypes.includes(type) ? "default" : "outline"}
+                      className={`cursor-pointer p-3 text-center transition-all ${
+                        formData.bookingPreferences.meetingTypes.includes(type)
+                          ? 'bg-gradient-to-r from-orange-500 to-purple-600 text-white'
+                          : 'hover:bg-gray-100'
+                      }`}
+                      onClick={() => toggleBookingPreference('meetingTypes', type)}
+                    >
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Timezone */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">🌍 Your timezone (optional)</h3>
+                <Input
+                  placeholder="e.g., GMT+1, EST, PST, etc."
+                  value={formData.bookingPreferences.timezone}
+                  onChange={(e) => handleInputChange('bookingPreferences.timezone', e.target.value)}
+                  className="text-lg p-4"
+                />
+              </div>
             </div>
           </div>
         );

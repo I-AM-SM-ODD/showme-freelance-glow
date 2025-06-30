@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import BookingModal from './BookingModal';
 
 // Portfolio display component
 const Portfolio = ({ data, onStartOver, onEdit }) => {
   const [showConfetti, setShowConfetti] = useState(true);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { toast } = useToast();
 
   // Handle sharing portfolio
@@ -30,6 +32,12 @@ const Portfolio = ({ data, onStartOver, onEdit }) => {
         break;
     }
   };
+
+  // Check if booking is enabled
+  const hasBookingEnabled = data.bookingPreferences && 
+    (data.bookingPreferences.availableDays?.length > 0 || 
+     data.bookingPreferences.timeSlots?.length > 0 || 
+     data.bookingPreferences.meetingTypes?.length > 0);
 
   // Remove confetti after animation
   React.useEffect(() => {
@@ -89,6 +97,21 @@ const Portfolio = ({ data, onStartOver, onEdit }) => {
                 </Badge>
               ))}
             </div>
+
+            {/* Book a Call Button */}
+            {hasBookingEnabled && (
+              <div className="mb-6">
+                <Button
+                  onClick={() => setIsBookingModalOpen(true)}
+                  className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-3 text-lg"
+                >
+                  📅 Book a Call
+                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  Available: {data.bookingPreferences.availableDays?.join(', ') || 'Flexible schedule'}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* About section */}
@@ -106,6 +129,62 @@ const Portfolio = ({ data, onStartOver, onEdit }) => {
             </h2>
             <p className="text-gray-700 leading-relaxed text-lg">{data.services}</p>
           </div>
+
+          {/* Booking Preferences (if enabled) */}
+          {hasBookingEnabled && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <span className="mr-2">📅</span> Call Booking
+              </h2>
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
+                <div className="grid md:grid-cols-3 gap-4">
+                  {data.bookingPreferences.availableDays?.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">📅 Available Days</h3>
+                      <div className="flex flex-wrap gap-1">
+                        {data.bookingPreferences.availableDays.map((day, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {day}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {data.bookingPreferences.timeSlots?.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">⏰ Time Slots</h3>
+                      <div className="space-y-1">
+                        {data.bookingPreferences.timeSlots.map((slot, index) => (
+                          <p key={index} className="text-sm text-gray-600">{slot}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {data.bookingPreferences.meetingTypes?.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-gray-800 mb-2">💬 Call Types</h3>
+                      <div className="space-y-1">
+                        {data.bookingPreferences.meetingTypes.map((type, index) => (
+                          <p key={index} className="text-sm text-gray-600">{type}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-4 text-center">
+                  <Button
+                    onClick={() => setIsBookingModalOpen(true)}
+                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
+                  >
+                    📞 Schedule a Call Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Contact section */}
           <div className="mb-8">
@@ -186,6 +265,15 @@ const Portfolio = ({ data, onStartOver, onEdit }) => {
           <p className="text-sm">Empowering freelancers worldwide 🌍</p>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      {hasBookingEnabled && (
+        <BookingModal
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          freelancerData={data}
+        />
+      )}
     </div>
   );
 };
