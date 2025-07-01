@@ -60,6 +60,12 @@ interface PortfolioData {
   booking: {
     isOpen: boolean;
   };
+  bookingPreferences: {
+    availableDays: string[];
+    timeSlots: string[];
+    meetingTypes: string[];
+    timezone: string;
+  };
 }
 
 const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
@@ -71,6 +77,17 @@ const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
 
   const handleCloseBooking = () => {
     setIsBookingOpen(false);
+  };
+
+  // Create freelancer data for booking modal
+  const freelancerData = {
+    name: data.personalInfo.name,
+    bookingPreferences: data.bookingPreferences || {
+      availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      timeSlots: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
+      meetingTypes: ['Discovery Call', 'Project Discussion', 'Consultation'],
+      timezone: 'UTC'
+    }
   };
 
   return (
@@ -254,7 +271,11 @@ const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
       </div>
 
       {/* Booking Modal */}
-      <BookingModal isOpen={isBookingOpen} onClose={handleCloseBooking} />
+      <BookingModal 
+        isOpen={isBookingOpen} 
+        onClose={handleCloseBooking} 
+        freelancerData={freelancerData}
+      />
     </div>
   );
 };
