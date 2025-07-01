@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,56 +19,6 @@ import {
 } from 'lucide-react';
 import BookingModal from './BookingModal';
 
-interface PortfolioData {
-  personalInfo: {
-    name: string;
-    title: string;
-    location: string;
-    phone: string;
-    email: string;
-    website: string;
-    about: string;
-  };
-  skills: string[];
-  experience: {
-    title: string;
-    company: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-  }[];
-  education: {
-    institution: string;
-    degree: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-  }[];
-  projects: {
-    name: string;
-    description: string;
-    link: string;
-  }[];
-  testimonials: {
-    author: string;
-    quote: string;
-  }[];
-  services: {
-    name: string;
-    description: string;
-    price: number;
-  }[];
-  booking: {
-    isOpen: boolean;
-  };
-  bookingPreferences: {
-    availableDays: string[];
-    timeSlots: string[];
-    meetingTypes: string[];
-    timezone: string;
-  };
-}
-
 const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
 
@@ -79,16 +30,25 @@ const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
     setIsBookingOpen(false);
   };
 
-  // Create freelancer data for booking modal
+  // Create freelancer data for booking modal with safe defaults
   const freelancerData = {
-    name: data.personalInfo.name,
-    bookingPreferences: data.bookingPreferences || {
+    name: data?.personalInfo?.name || 'Freelancer',
+    bookingPreferences: data?.bookingPreferences || {
       availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
       timeSlots: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
       meetingTypes: ['Discovery Call', 'Project Discussion', 'Consultation'],
       timezone: 'UTC'
     }
   };
+
+  // Safe data access with defaults
+  const personalInfo = data?.personalInfo || {};
+  const skills = data?.skills || [];
+  const experience = data?.experience || [];
+  const education = data?.education || [];
+  const projects = data?.projects || [];
+  const testimonials = data?.testimonials || [];
+  const services = data?.services || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -97,8 +57,8 @@ const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{data.personalInfo.name}</h1>
-              <p className="text-gray-600">{data.personalInfo.title}</p>
+              <h1 className="text-2xl font-bold text-gray-900">{personalInfo.name || 'Your Portfolio'}</h1>
+              <p className="text-gray-600">{personalInfo.title || 'Freelancer'}</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button onClick={onEdit} variant="outline" size="sm" className="bg-white/50">
@@ -126,148 +86,172 @@ const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
             <CardTitle>Personal Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-gray-600">
-              <MapPin className="w-4 h-4" />
-              <span>{data.personalInfo.location}</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Phone className="w-4 h-4" />
-              <span>{data.personalInfo.phone}</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Mail className="w-4 h-4" />
-              <span>{data.personalInfo.email}</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Globe className="w-4 h-4" />
-              <a href={data.personalInfo.website} target="_blank" rel="noopener noreferrer" className="underline">
-                {data.personalInfo.website}
-              </a>
-            </div>
-            <div>
-              <p className="text-gray-700">{data.personalInfo.about}</p>
-            </div>
+            {personalInfo.location && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <MapPin className="w-4 h-4" />
+                <span>{personalInfo.location}</span>
+              </div>
+            )}
+            {personalInfo.phone && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Phone className="w-4 h-4" />
+                <span>{personalInfo.phone}</span>
+              </div>
+            )}
+            {personalInfo.email && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Mail className="w-4 h-4" />
+                <span>{personalInfo.email}</span>
+              </div>
+            )}
+            {personalInfo.website && (
+              <div className="flex items-center gap-2 text-gray-600">
+                <Globe className="w-4 h-4" />
+                <a href={personalInfo.website} target="_blank" rel="noopener noreferrer" className="underline">
+                  {personalInfo.website}
+                </a>
+              </div>
+            )}
+            {personalInfo.about && (
+              <div>
+                <p className="text-gray-700">{personalInfo.about}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Skills */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Skills</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {data.skills.map((skill, index) => (
-                <Badge key={index}>{skill}</Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {skills.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill, index) => (
+                  <Badge key={index}>{skill}</Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Experience */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Experience</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.experience.map((exp, index) => (
-              <div key={index} className="border rounded-md p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
-                  <div className="text-sm text-gray-600">
-                    {exp.startDate} - {exp.endDate || 'Present'}
+        {experience.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Experience</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {experience.map((exp, index) => (
+                <div key={index} className="border rounded-md p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
+                    <div className="text-sm text-gray-600">
+                      {exp.startDate} - {exp.endDate || 'Present'}
+                    </div>
                   </div>
+                  <h4 className="text-md font-medium text-gray-700">{exp.company}</h4>
+                  <p className="text-gray-700">{exp.description}</p>
                 </div>
-                <h4 className="text-md font-medium text-gray-700">{exp.company}</h4>
-                <p className="text-gray-700">{exp.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Education */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Education</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.education.map((edu, index) => (
-              <div key={index} className="border rounded-md p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
-                  <div className="text-sm text-gray-600">
-                    {edu.startDate} - {edu.endDate}
+        {education.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Education</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {education.map((edu, index) => (
+                <div key={index} className="border rounded-md p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
+                    <div className="text-sm text-gray-600">
+                      {edu.startDate} - {edu.endDate}
+                    </div>
                   </div>
+                  <h4 className="text-md font-medium text-gray-700">{edu.institution}</h4>
+                  <p className="text-gray-700">{edu.description}</p>
                 </div>
-                <h4 className="text-md font-medium text-gray-700">{edu.institution}</h4>
-                <p className="text-gray-700">{edu.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Projects */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Projects</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.projects.map((project, index) => (
-              <div key={index} className="border rounded-md p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-                  <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline flex items-center gap-1">
-                    <ExternalLink className="w-4 h-4" />
-                    View Project
-                  </a>
+        {projects.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Projects</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {projects.map((project, index) => (
+                <div key={index} className="border rounded-md p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                    {project.link && (
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline flex items-center gap-1">
+                        <ExternalLink className="w-4 h-4" />
+                        View Project
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-gray-700">{project.description}</p>
                 </div>
-                <p className="text-gray-700">{project.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Testimonials */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Testimonials</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.testimonials.map((testimonial, index) => (
-              <div key={index} className="border rounded-md p-4">
-                <div className="mb-2">
-                  <Star className="w-5 h-5 text-yellow-500 inline-block mr-1" />
-                  <span className="font-semibold text-gray-900">{testimonial.author}</span>
+        {testimonials.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Testimonials</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {testimonials.map((testimonial, index) => (
+                <div key={index} className="border rounded-md p-4">
+                  <div className="mb-2">
+                    <Star className="w-5 h-5 text-yellow-500 inline-block mr-1" />
+                    <span className="font-semibold text-gray-900">{testimonial.author}</span>
+                  </div>
+                  <p className="text-gray-700 italic">"{testimonial.quote}"</p>
                 </div>
-                <p className="text-gray-700 italic">"{testimonial.quote}"</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
          {/* Services */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle>Services</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.services.map((service, index) => (
-              <div key={index} className="border rounded-md p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
-                    <p className="text-gray-700">{service.description}</p>
+        {services.length > 0 && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Services</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {services.map((service, index) => (
+                <div key={index} className="border rounded-md p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
+                      <p className="text-gray-700">{service.description}</p>
+                    </div>
+                    <div className="text-xl font-bold text-brand">${service.price}</div>
                   </div>
-                  <div className="text-xl font-bold text-brand">${service.price}</div>
+                  <Button onClick={handleOpenBooking} variant="outline" size="sm">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Book Now
+                  </Button>
                 </div>
-                <Button onClick={handleOpenBooking} variant="outline" size="sm">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Now
-                </Button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Booking Modal */}

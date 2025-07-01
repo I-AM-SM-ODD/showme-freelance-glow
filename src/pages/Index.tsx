@@ -4,11 +4,13 @@ import WelcomeScreen from '../components/WelcomeScreen';
 import FormWizard from '../components/FormWizard';
 import Portfolio from '../components/Portfolio';
 import InvoiceGenerator from '../components/InvoiceGenerator';
+import { transformFormDataToPortfolio } from '../utils/dataTransform';
 
 // Main app component that manages the overall flow
 const Index = () => {
   const [currentStep, setCurrentStep] = useState('welcome'); // 'welcome', 'form', 'portfolio', 'invoices'
   const [portfolioData, setPortfolioData] = useState(null);
+  const [formData, setFormData] = useState(null);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -16,7 +18,14 @@ const Index = () => {
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        setPortfolioData(parsed);
+        setFormData(parsed);
+        // Transform the data for portfolio display
+        const transformedData = transformFormDataToPortfolio(parsed);
+        setPortfolioData(transformedData);
+        // If we have data, show portfolio by default
+        if (parsed.name) {
+          setCurrentStep('portfolio');
+        }
       } catch (error) {
         console.log('No valid saved data found');
       }
@@ -30,8 +39,11 @@ const Index = () => {
 
   // Handle form completion and moving to portfolio view
   const handleFormComplete = (data) => {
-    setPortfolioData(data);
-    // Save to localStorage
+    setFormData(data);
+    // Transform the data for portfolio display
+    const transformedData = transformFormDataToPortfolio(data);
+    setPortfolioData(transformedData);
+    // Save original form data to localStorage
     localStorage.setItem('showme-portfolio', JSON.stringify(data));
     setCurrentStep('portfolio');
   };
@@ -39,6 +51,7 @@ const Index = () => {
   // Handle starting over (clear data and go back to welcome)
   const handleStartOver = () => {
     setPortfolioData(null);
+    setFormData(null);
     localStorage.removeItem('showme-portfolio');
     setCurrentStep('welcome');
   };
@@ -67,7 +80,7 @@ const Index = () => {
       {currentStep === 'form' && (
         <FormWizard 
           onComplete={handleFormComplete}
-          initialData={portfolioData}
+          initialData={formData}
         />
       )}
       

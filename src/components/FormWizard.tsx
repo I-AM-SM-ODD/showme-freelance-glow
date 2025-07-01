@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2 } from 'lucide-react';
 import EnhancedBolu from './EnhancedBolu';
 import FileUpload from './FileUpload';
 
@@ -33,6 +34,10 @@ const FormWizard = ({ onComplete, initialData }) => {
     },
     hourlyRate: '',
     availability: '',
+    experience: [],
+    education: [],
+    projects: [],
+    testimonials: [],
     bookingPreferences: {
       availableDays: [],
       timeSlots: [],
@@ -43,7 +48,7 @@ const FormWizard = ({ onComplete, initialData }) => {
     ...initialData // Load existing data if editing
   });
 
-  const totalSteps = 9; // Increased from 8 to 9 for booking preferences
+  const totalSteps = 13; // Increased to include new sections
   const progress = (currentStep / totalSteps) * 100;
 
   // Available skills for selection
@@ -114,6 +119,53 @@ const FormWizard = ({ onComplete, initialData }) => {
     }));
   };
 
+  // Add array item functions
+  const addExperience = () => {
+    setFormData(prev => ({
+      ...prev,
+      experience: [...prev.experience, { title: '', company: '', startDate: '', endDate: '', description: '' }]
+    }));
+  };
+
+  const addEducation = () => {
+    setFormData(prev => ({
+      ...prev,
+      education: [...prev.education, { institution: '', degree: '', startDate: '', endDate: '', description: '' }]
+    }));
+  };
+
+  const addProject = () => {
+    setFormData(prev => ({
+      ...prev,
+      projects: [...prev.projects, { name: '', description: '', link: '' }]
+    }));
+  };
+
+  const addTestimonial = () => {
+    setFormData(prev => ({
+      ...prev,
+      testimonials: [...prev.testimonials, { author: '', quote: '' }]
+    }));
+  };
+
+  // Remove array item functions
+  const removeArrayItem = (arrayName, index) => {
+    setFormData(prev => ({
+      ...prev,
+      [arrayName]: prev[arrayName].filter((_, i) => i !== index)
+    }));
+  };
+
+  // Update array item functions
+  const updateArrayItem = (arrayName, index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [arrayName]: prev[arrayName].map((item, i) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
   // Validate current step
   const isStepValid = () => {
     switch (currentStep) {
@@ -125,7 +177,11 @@ const FormWizard = ({ onComplete, initialData }) => {
       case 6: return formData.email.trim() !== '';
       case 7: return true; // File uploads are optional
       case 8: return true; // Portfolio links are optional
-      case 9: return true; // Booking preferences are optional
+      case 9: return true; // Experience is optional
+      case 10: return true; // Education is optional
+      case 11: return true; // Projects are optional
+      case 12: return true; // Testimonials are optional
+      case 13: return true; // Booking preferences are optional
       default: return true;
     }
   };
@@ -169,8 +225,16 @@ const FormWizard = ({ onComplete, initialData }) => {
       case 7:
         return { mood: 'excited' as const, message: "Let's make your portfolio shine! ✨" };
       case 8:
-        return { mood: 'celebrating' as const, message: "Almost done! Share your online presence 🌐" };
+        return { mood: 'celebrating' as const, message: "Share your online presence 🌐" };
       case 9:
+        return { mood: 'thinking' as const, message: "Tell me about your work experience! 💼" };
+      case 10:
+        return { mood: 'happy' as const, message: "What about your education? 🎓" };
+      case 11:
+        return { mood: 'excited' as const, message: "Show off your best projects! 🚀" };
+      case 12:
+        return { mood: 'celebrating' as const, message: "Any client testimonials? ⭐" };
+      case 13:
         return { mood: 'excited' as const, message: "Let's set up call booking for your clients! 📅" };
       default:
         return { mood: 'happy' as const, message: "You're doing great!" };
@@ -409,6 +473,209 @@ const FormWizard = ({ onComplete, initialData }) => {
         );
 
       case 9:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Work Experience</h2>
+              <p className="text-gray-600">Add your professional experience (optional)</p>
+            </div>
+            <div className="space-y-4">
+              {formData.experience.map((exp, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Experience #{index + 1}</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeArrayItem('experience', index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Job title"
+                    value={exp.title}
+                    onChange={(e) => updateArrayItem('experience', index, 'title', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Company name"
+                    value={exp.company}
+                    onChange={(e) => updateArrayItem('experience', index, 'company', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      placeholder="Start date"
+                      value={exp.startDate}
+                      onChange={(e) => updateArrayItem('experience', index, 'startDate', e.target.value)}
+                    />
+                    <Input
+                      placeholder="End date (or 'Present')"
+                      value={exp.endDate}
+                      onChange={(e) => updateArrayItem('experience', index, 'endDate', e.target.value)}
+                    />
+                  </div>
+                  <Textarea
+                    placeholder="Describe your role and achievements"
+                    value={exp.description}
+                    onChange={(e) => updateArrayItem('experience', index, 'description', e.target.value)}
+                  />
+                </div>
+              ))}
+              <Button onClick={addExperience} variant="outline" className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Experience
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 10:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Education</h2>
+              <p className="text-gray-600">Add your educational background (optional)</p>
+            </div>
+            <div className="space-y-4">
+              {formData.education.map((edu, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Education #{index + 1}</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeArrayItem('education', index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Degree/Certification"
+                    value={edu.degree}
+                    onChange={(e) => updateArrayItem('education', index, 'degree', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Institution name"
+                    value={edu.institution}
+                    onChange={(e) => updateArrayItem('education', index, 'institution', e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      placeholder="Start date"
+                      value={edu.startDate}
+                      onChange={(e) => updateArrayItem('education', index, 'startDate', e.target.value)}
+                    />
+                    <Input
+                      placeholder="End date"
+                      value={edu.endDate}
+                      onChange={(e) => updateArrayItem('education', index, 'endDate', e.target.value)}
+                    />
+                  </div>
+                  <Textarea
+                    placeholder="Additional details"
+                    value={edu.description}
+                    onChange={(e) => updateArrayItem('education', index, 'description', e.target.value)}
+                  />
+                </div>
+              ))}
+              <Button onClick={addEducation} variant="outline" className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Education
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 11:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Projects</h2>
+              <p className="text-gray-600">Showcase your best work (optional)</p>
+            </div>
+            <div className="space-y-4">
+              {formData.projects.map((project, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Project #{index + 1}</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeArrayItem('projects', index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Project name"
+                    value={project.name}
+                    onChange={(e) => updateArrayItem('projects', index, 'name', e.target.value)}
+                  />
+                  <Input
+                    placeholder="Project link/URL"
+                    value={project.link}
+                    onChange={(e) => updateArrayItem('projects', index, 'link', e.target.value)}
+                  />
+                  <Textarea
+                    placeholder="Project description"
+                    value={project.description}
+                    onChange={(e) => updateArrayItem('projects', index, 'description', e.target.value)}
+                  />
+                </div>
+              ))}
+              <Button onClick={addProject} variant="outline" className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Project
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 12:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <EnhancedBolu {...boluProps} />
+              <h2 className="text-2xl font-bold text-gray-800">Testimonials</h2>
+              <p className="text-gray-600">Add client testimonials (optional)</p>
+            </div>
+            <div className="space-y-4">
+              {formData.testimonials.map((testimonial, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Testimonial #{index + 1}</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeArrayItem('testimonials', index)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Client name"
+                    value={testimonial.author}
+                    onChange={(e) => updateArrayItem('testimonials', index, 'author', e.target.value)}
+                  />
+                  <Textarea
+                    placeholder="What did they say about your work?"
+                    value={testimonial.quote}
+                    onChange={(e) => updateArrayItem('testimonials', index, 'quote', e.target.value)}
+                  />
+                </div>
+              ))}
+              <Button onClick={addTestimonial} variant="outline" className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Testimonial
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 13:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
