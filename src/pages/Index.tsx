@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import WelcomeScreen from '../components/WelcomeScreen';
 import FormWizard from '../components/FormWizard';
 import Portfolio from '../components/Portfolio';
+import InvoiceGenerator from '../components/InvoiceGenerator';
 
 // Main app component that manages the overall flow
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState('welcome'); // 'welcome', 'form', 'portfolio'
+  const [currentStep, setCurrentStep] = useState('welcome'); // 'welcome', 'form', 'portfolio', 'invoices'
   const [portfolioData, setPortfolioData] = useState(null);
 
   // Load saved data from localStorage on component mount
@@ -47,8 +48,18 @@ const Index = () => {
     setCurrentStep('form');
   };
 
+  // Handle navigation to invoices
+  const handleOpenInvoices = () => {
+    setCurrentStep('invoices');
+  };
+
+  // Handle navigation back to portfolio
+  const handleBackToPortfolio = () => {
+    setCurrentStep('portfolio');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 via-pink-50 to-purple-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {currentStep === 'welcome' && (
         <WelcomeScreen onStart={handleStartForm} />
       )}
@@ -65,7 +76,22 @@ const Index = () => {
           data={portfolioData}
           onStartOver={handleStartOver}
           onEdit={handleEdit}
+          onOpenInvoices={handleOpenInvoices}
         />
+      )}
+
+      {currentStep === 'invoices' && (
+        <div>
+          <div className="p-4">
+            <button
+              onClick={handleBackToPortfolio}
+              className="mb-4 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm border hover:bg-gray-50 transition-colors"
+            >
+              ← Back to Portfolio
+            </button>
+          </div>
+          <InvoiceGenerator />
+        </div>
       )}
     </div>
   );

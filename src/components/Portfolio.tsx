@@ -1,279 +1,260 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Globe, 
+  Star, 
+  Calendar, 
+  Clock, 
+  Edit3, 
+  RotateCcw,
+  FileText,
+  ExternalLink,
+  Download
+} from 'lucide-react';
 import BookingModal from './BookingModal';
 
-// Portfolio display component
-const Portfolio = ({ data, onStartOver, onEdit }) => {
-  const [showConfetti, setShowConfetti] = useState(true);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const { toast } = useToast();
+interface PortfolioData {
+  personalInfo: {
+    name: string;
+    title: string;
+    location: string;
+    phone: string;
+    email: string;
+    website: string;
+    about: string;
+  };
+  skills: string[];
+  experience: {
+    title: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }[];
+  education: {
+    institution: string;
+    degree: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }[];
+  projects: {
+    name: string;
+    description: string;
+    link: string;
+  }[];
+  testimonials: {
+    author: string;
+    quote: string;
+  }[];
+  services: {
+    name: string;
+    description: string;
+    price: number;
+  }[];
+  booking: {
+    isOpen: boolean;
+  };
+}
 
-  // Handle sharing portfolio
-  const handleShare = (platform) => {
-    const portfolioUrl = window.location.href;
-    const shareText = `Check out ${data.name}'s freelancer portfolio!`;
+const Portfolio = ({ data, onStartOver, onEdit, onOpenInvoices }) => {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
-    switch (platform) {
-      case 'whatsapp':
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + portfolioUrl)}`);
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(portfolioUrl);
-        toast({
-          title: "Link copied! 📋",
-          description: "Portfolio link copied to clipboard",
-        });
-        break;
-      default:
-        break;
-    }
+  const handleOpenBooking = () => {
+    setIsBookingOpen(true);
   };
 
-  // Check if booking is enabled
-  const hasBookingEnabled = data.bookingPreferences && 
-    (data.bookingPreferences.availableDays?.length > 0 || 
-     data.bookingPreferences.timeSlots?.length > 0 || 
-     data.bookingPreferences.meetingTypes?.length > 0);
-
-  // Remove confetti after animation
-  React.useEffect(() => {
-    const timer = setTimeout(() => setShowConfetti(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+  const handleCloseBooking = () => {
+    setIsBookingOpen(false);
+  };
 
   return (
-    <div className="min-h-screen p-4">
-      {/* Confetti animation */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-          <div className="text-6xl animate-bounce">🎉</div>
-          <div className="absolute top-20 left-1/4 text-4xl animate-pulse">✨</div>
-          <div className="absolute top-32 right-1/3 text-3xl animate-bounce delay-300">🎊</div>
-          <div className="absolute bottom-1/3 left-1/3 text-5xl animate-pulse delay-500">🌟</div>
-        </div>
-      )}
-
-      <div className="max-w-4xl mx-auto">
-        {/* Action buttons */}
-        <div className="mb-6 flex justify-center gap-4">
-          <Button
-            onClick={onEdit}
-            variant="outline"
-            className="px-6"
-          >
-            ✏️ Edit Info
-          </Button>
-          <Button
-            onClick={onStartOver}
-            variant="outline"
-            className="px-6"
-          >
-            🔄 Start Over
-          </Button>
-        </div>
-
-        {/* Portfolio content */}
-        <Card className="p-8 bg-white/95 backdrop-blur-sm shadow-xl border-0">
-          {/* Header section */}
-          <div className="text-center mb-8">
-            <div className="w-24 h-24 bg-gradient-to-r from-orange-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
-              {data.name.charAt(0).toUpperCase()}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header with Actions */}
+      <div className="bg-white/80 backdrop-blur-lg border-b border-white/20 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{data.personalInfo.name}</h1>
+              <p className="text-gray-600">{data.personalInfo.title}</p>
             </div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">{data.name}</h1>
-            <p className="text-xl text-gray-600 mb-4">📍 {data.location}</p>
-            
-            {/* Skills */}
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {data.skills.map((skill, index) => (
-                <Badge 
-                  key={index} 
-                  className="bg-gradient-to-r from-orange-500 to-purple-600 text-white px-3 py-1"
-                >
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Book a Call Button */}
-            {hasBookingEnabled && (
-              <div className="mb-6">
-                <Button
-                  onClick={() => setIsBookingModalOpen(true)}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-3 text-lg"
-                >
-                  📅 Book a Call
-                </Button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Available: {data.bookingPreferences.availableDays?.join(', ') || 'Flexible schedule'}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* About section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="mr-2">👋</span> About Me
-            </h2>
-            <p className="text-gray-700 leading-relaxed text-lg">{data.bio}</p>
-          </div>
-
-          {/* Services section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="mr-2">🛠️</span> Services I Offer
-            </h2>
-            <p className="text-gray-700 leading-relaxed text-lg">{data.services}</p>
-          </div>
-
-          {/* Booking Preferences (if enabled) */}
-          {hasBookingEnabled && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <span className="mr-2">📅</span> Call Booking
-              </h2>
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-                <div className="grid md:grid-cols-3 gap-4">
-                  {data.bookingPreferences.availableDays?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">📅 Available Days</h3>
-                      <div className="flex flex-wrap gap-1">
-                        {data.bookingPreferences.availableDays.map((day, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {day}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {data.bookingPreferences.timeSlots?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">⏰ Time Slots</h3>
-                      <div className="space-y-1">
-                        {data.bookingPreferences.timeSlots.map((slot, index) => (
-                          <p key={index} className="text-sm text-gray-600">{slot}</p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {data.bookingPreferences.meetingTypes?.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">💬 Call Types</h3>
-                      <div className="space-y-1">
-                        {data.bookingPreferences.meetingTypes.map((type, index) => (
-                          <p key={index} className="text-sm text-gray-600">{type}</p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="mt-4 text-center">
-                  <Button
-                    onClick={() => setIsBookingModalOpen(true)}
-                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
-                  >
-                    📞 Schedule a Call Now
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Contact section */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <span className="mr-2">📱</span> Let's Work Together
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                <span className="text-2xl">📧</span>
-                <div>
-                  <p className="font-semibold text-gray-800">Email</p>
-                  <a href={`mailto:${data.email}`} className="text-blue-600 hover:underline">
-                    {data.email}
-                  </a>
-                </div>
-              </div>
-              
-              {data.phone && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                  <span className="text-2xl">📞</span>
-                  <div>
-                    <p className="font-semibold text-gray-800">Phone</p>
-                    <a href={`tel:${data.phone}`} className="text-blue-600 hover:underline">
-                      {data.phone}
-                    </a>
-                  </div>
-                </div>
-              )}
-              
-              {data.whatsapp && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                  <span className="text-2xl">💬</span>
-                  <div>
-                    <p className="font-semibold text-gray-800">WhatsApp</p>
-                    <a 
-                      href={`https://wa.me/${data.whatsapp.replace(/[^0-9]/g, '')}`}
-                      className="text-green-600 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {data.whatsapp}
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Share section */}
-          <div className="text-center border-t pt-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              🚀 Share This Portfolio
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={() => handleShare('whatsapp')}
-                className="bg-green-500 hover:bg-green-600 text-white px-6"
-              >
-                💬 Share on WhatsApp
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={onEdit} variant="outline" size="sm" className="bg-white/50">
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit Portfolio
               </Button>
-              <Button
-                onClick={() => handleShare('copy')}
-                variant="outline"
-                className="px-6"
-              >
-                📋 Copy Link
+              <Button onClick={onOpenInvoices} variant="outline" size="sm" className="bg-white/50">
+                <FileText className="w-4 h-4 mr-2" />
+                Invoice Generator
+              </Button>
+              <Button onClick={onStartOver} variant="outline" size="sm" className="bg-white/50">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Start Over
               </Button>
             </div>
-            <p className="text-sm text-gray-500 mt-4">
-              Share this portfolio with potential clients!
-            </p>
           </div>
-        </Card>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-gray-500">
-          <p>Made with ❤️ using ShowMe</p>
-          <p className="text-sm">Empowering freelancers worldwide 🌍</p>
         </div>
       </div>
 
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto p-6 space-y-8">
+        {/* Personal Information */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2 text-gray-600">
+              <MapPin className="w-4 h-4" />
+              <span>{data.personalInfo.location}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Phone className="w-4 h-4" />
+              <span>{data.personalInfo.phone}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Mail className="w-4 h-4" />
+              <span>{data.personalInfo.email}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <Globe className="w-4 h-4" />
+              <a href={data.personalInfo.website} target="_blank" rel="noopener noreferrer" className="underline">
+                {data.personalInfo.website}
+              </a>
+            </div>
+            <div>
+              <p className="text-gray-700">{data.personalInfo.about}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Skills */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Skills</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {data.skills.map((skill, index) => (
+                <Badge key={index}>{skill}</Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Experience */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Experience</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.experience.map((exp, index) => (
+              <div key={index} className="border rounded-md p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
+                  <div className="text-sm text-gray-600">
+                    {exp.startDate} - {exp.endDate || 'Present'}
+                  </div>
+                </div>
+                <h4 className="text-md font-medium text-gray-700">{exp.company}</h4>
+                <p className="text-gray-700">{exp.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Education */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Education</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.education.map((edu, index) => (
+              <div key={index} className="border rounded-md p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
+                  <div className="text-sm text-gray-600">
+                    {edu.startDate} - {edu.endDate}
+                  </div>
+                </div>
+                <h4 className="text-md font-medium text-gray-700">{edu.institution}</h4>
+                <p className="text-gray-700">{edu.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Projects */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Projects</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.projects.map((project, index) => (
+              <div key={index} className="border rounded-md p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                  <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline flex items-center gap-1">
+                    <ExternalLink className="w-4 h-4" />
+                    View Project
+                  </a>
+                </div>
+                <p className="text-gray-700">{project.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Testimonials */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Testimonials</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.testimonials.map((testimonial, index) => (
+              <div key={index} className="border rounded-md p-4">
+                <div className="mb-2">
+                  <Star className="w-5 h-5 text-yellow-500 inline-block mr-1" />
+                  <span className="font-semibold text-gray-900">{testimonial.author}</span>
+                </div>
+                <p className="text-gray-700 italic">"{testimonial.quote}"</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+         {/* Services */}
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle>Services</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.services.map((service, index) => (
+              <div key={index} className="border rounded-md p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
+                    <p className="text-gray-700">{service.description}</p>
+                  </div>
+                  <div className="text-xl font-bold text-brand">${service.price}</div>
+                </div>
+                <Button onClick={handleOpenBooking} variant="outline" size="sm">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Book Now
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Booking Modal */}
-      {hasBookingEnabled && (
-        <BookingModal
-          isOpen={isBookingModalOpen}
-          onClose={() => setIsBookingModalOpen(false)}
-          freelancerData={data}
-        />
-      )}
+      <BookingModal isOpen={isBookingOpen} onClose={handleCloseBooking} />
     </div>
   );
 };
